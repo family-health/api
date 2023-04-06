@@ -27,10 +27,12 @@ export class User {
     })
     email: string;
 
+
     @Column('text', {
+        select: false,
         nullable: false
     })
-    password: string;
+    password: string
 
     @Column('text', {
         default: null
