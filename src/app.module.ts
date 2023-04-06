@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
     imports: [
         ConfigModule.forRoot(),
         TypeOrmModule.forRoot({
-            type: 'mysql',
+            type: 'postgres',
             host: process.env.DB_HOST,
             port: +process.env.DB_PORT,
             database: process.env.DB_NAME,
@@ -15,6 +16,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
             autoLoadEntities: true,
             synchronize: true,
         }),
+        AuthModule,
     ]
 })
 export class AppModule { }
