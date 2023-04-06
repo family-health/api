@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common';
-import { CreateUserDto, LoginUserDto } from './dto';
-import { User } from './entities';
+import { CreateUserDto, LoginUserDto, UpdateUserDto } from '../dto';
+import { User } from '../entities';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from "bcrypt";
-import { JwtPayload } from './interfaces';
+import { JwtPayload } from '../interfaces';
 import { JwtService } from '@nestjs/jwt';
 
 
