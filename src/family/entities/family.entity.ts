@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/auth/entities";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Family {
@@ -25,4 +26,11 @@ export class Family {
         nullable: false
     })
     relation?: string;
+
+    @ManyToOne(
+        () => User,
+        user => user.family,
+        { onDelete: 'CASCADE' }
+    )
+    user: User
 }

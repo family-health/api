@@ -21,6 +21,9 @@ export class UserService {
             return this.userRepository.find({
                 take: limit,
                 skip: offset,
+                relations: {
+                    family: true
+                }
             });
         } catch (error) {
             this.handleExceptions(error);

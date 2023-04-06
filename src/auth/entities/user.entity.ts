@@ -1,4 +1,5 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Family } from "src/family/entities";
 
 @Entity()
 export class User {
@@ -51,6 +52,13 @@ export class User {
     }
     )
     isActive: boolean
+
+    @OneToMany(
+        () => Family,
+        family => family.user,
+        { cascade: true, eager: true }
+    )
+    family?: Family[]
 
     @BeforeInsert()
     checkFildsBeforeInserts() {
