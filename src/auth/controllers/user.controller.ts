@@ -1,8 +1,11 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Put } from "@nestjs/common";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Put, Query } from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { UserService } from "../services";
 import { UpdateUserDto } from "../dto";
 import { UuidV4Pipe } from "src/common/pipes";
+import { PaginationDto } from "src/common/dto";
+import { Auth } from "../decorators";
+import { ValidRoles } from "../enum";
 
 @Controller('user')
 @ApiTags('User')
@@ -11,24 +14,29 @@ export class UserController {
 
 
   @Get()
+  @Auth(ValidRoles.superUser)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get All' })
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Query() paginationDto:PaginationDto) {
+    return this.userService.findAll(paginationDto);
   }
 
   @Get(':id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get By Id' })
   findOne(@Param('id', UuidV4Pipe) id: string,) {
     return this.userService.findOne(id);
   }
 
   @Put(':id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update By Id' })
   update(@Param('id', UuidV4Pipe) id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete By Id' })
   delete(@Param('id', UuidV4Pipe) id: string) {
     return this.userService.delete(id);
