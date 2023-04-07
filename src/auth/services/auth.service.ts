@@ -41,11 +41,10 @@ export class AuthService {
           phone:true,
           isActive:true,
           lastname:true,
-          roles:true
+          roles:true,
         }
       });
       if (!res) throw new NotFoundException(`User with id ${user} not found`);
-      delete res.password;
       const response: ResponseApi = {
         success: true,
         message: 'User created successfully!',
@@ -84,7 +83,6 @@ export class AuthService {
     if (!bcrypt.compareSync(password, user.password)) throw new UnauthorizedException(`Invalid credentials entered`);
 
     try {
-      delete user.password;
       const response: ResponseApi = {
         success: true,
         message: 'User authenticated successfully!',
