@@ -19,11 +19,13 @@ export class Family {
     })
     phone: string;
     @Column('text', {
-        nullable: false
+        nullable: false,
+        unique:true
     })
     email: string;
     @Column('text', {
-        nullable: false
+        nullable: false,
+        unique:true
     })
     relation?: string;
 

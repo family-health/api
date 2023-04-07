@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Family } from './entities';
 import { DataSource, Repository } from 'typeorm';
 import { User } from 'src/auth/entities';
+import { ResponseApi } from 'src/common/interfaces';
 
 @Injectable()
 export class FamilyService {
@@ -28,22 +29,33 @@ export class FamilyService {
         user
       });
       await this.familyRepository.save(family);
-      return family;
+      const response: ResponseApi = {
+        success: true,
+        message: 'Family created successfully!',
+        data: family,
+      }
+      return response;
     } catch (error) {
       this.handleExceptions(error);
     }
   }
 
-  findAll(paginationDto: PaginationDto) {
+  async findAll(paginationDto: PaginationDto) {
     try {
       const { limit = 10, offset = 0 } = paginationDto;
-      return this.familyRepository.find({
+      const families = await this.familyRepository.find({
         take: limit,
         skip: offset,
         relations: {
           user: true
         }
       });
+      const response: ResponseApi = {
+        success: true,
+        message: 'All Family',
+        data: families,
+      }
+      return response;
     } catch (error) {
       this.handleExceptions(error);
     }
@@ -52,7 +64,12 @@ export class FamilyService {
   async findOne(id: string) {
     const family = await this.familyRepository.findOneBy({ id });
     if (!family) throw new NotFoundException(`Family with id ${id} not found`);
-    return family;
+    const response: ResponseApi = {
+      success: true,
+      message: 'Family found!',
+      data: family,
+    }
+    return response;
   }
 
   async update(id: string, updateFamilyDto: UpdateFamilyDto) {
@@ -70,8 +87,13 @@ export class FamilyService {
       await queryRunner.manager.save(family);
       await queryRunner.commitTransaction();
       await queryRunner.release();
-
-      return this.familyRepository.findOneBy({ id });
+      const res = await this.familyRepository.findOneBy({ id });
+      const response: ResponseApi = {
+        success: true,
+        message: 'Family modified successfully!',
+        data: res,
+      }
+      return response;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();

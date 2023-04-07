@@ -19,7 +19,8 @@ export class CreateUserDto {
 
     @ApiProperty()
     @IsString()
-    username: string
+    @MinLength(6)
+    phone: string
 
     @ApiProperty()
     @IsString()

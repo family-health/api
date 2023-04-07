@@ -4,6 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../entities";
 import { DataSource, Repository } from "typeorm";
 import { PaginationDto } from "src/common/dto";
+import { ResponseApi } from "src/common/interfaces";
 
 @Injectable()
 export class UserService {
@@ -18,13 +19,20 @@ export class UserService {
     async findAll(paginationDto: PaginationDto) {
         try {
             const { limit = 10, offset = 0 } = paginationDto;
-            return this.userRepository.find({
+            const users = await this.userRepository.find({
                 take: limit,
                 skip: offset,
                 relations: {
                     family: true
                 }
             });
+
+            const response: ResponseApi = {
+                success: true,
+                message: 'All users!',
+                data: users,
+            }
+            return response;
         } catch (error) {
             this.handleExceptions(error);
         }
@@ -33,7 +41,12 @@ export class UserService {
     async findOne(id: string) {
         const user = await this.userRepository.findOneBy({ id });
         if (!user) throw new NotFoundException(`User with id ${id} not found`);
-        return user;
+        const response: ResponseApi = {
+            success: true,
+            message: 'User Found!',
+            data: user,
+        }
+        return response;
     }
 
     async update(id: string, updateUserDto: UpdateUserDto) {
@@ -56,8 +69,12 @@ export class UserService {
             await queryRunner.manager.save(user);
             await queryRunner.commitTransaction();
             await queryRunner.release();
-
-            return this.userRepository.findOneBy({ id });
+            const response: ResponseApi = {
+                success: true,
+                message: 'User modificated successfully!',
+                data: user,
+            }
+            return response;
         } catch (error) {
             await queryRunner.rollbackTransaction();
             await queryRunner.release();

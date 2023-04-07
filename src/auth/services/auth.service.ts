@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from "bcrypt";
 import { JwtPayload } from '../interfaces';
 import { JwtService } from '@nestjs/jwt';
+import { ResponseApi } from 'src/common/interfaces';
 
 
 @Injectable()
@@ -28,7 +29,14 @@ export class AuthService {
       );
       await this.userRepository.save(user);
       delete user.password;
-      return { ...user, token: this.getJwyToken({ id: user.id }) };
+      const response: ResponseApi = {
+        success: true,
+        message: 'User created successfully!',
+        data: {
+          ...user, token: this.getJwyToken({ id: user.id })
+        },
+      }
+      return response;
     } catch (error) {
       this.handleExceptions(error);
     }
@@ -53,7 +61,14 @@ export class AuthService {
 
     try {
       delete user.password;
-      return { ...user, token: this.getJwyToken({ id: user.id }) };
+      const response: ResponseApi = {
+        success: true,
+        message: 'User authenticated successfully!',
+        data: {
+          ...user, token: this.getJwyToken({ id: user.id })
+        },
+      }
+      return response;
     } catch (error) {
       this.handleExceptions(error);
     }

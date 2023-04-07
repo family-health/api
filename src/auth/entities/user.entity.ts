@@ -16,17 +16,18 @@ export class User {
     })
     lastname: string;
 
-    @Column('text', {
-        unique: true,
-        nullable: false
-    })
-    username: string;
 
     @Column('text', {
         unique: true,
         nullable: false
     })
     email: string;
+
+    @Column('text', {
+        unique: true,
+        nullable: false
+    })
+    phone: string;
 
 
     @Column('text', {
