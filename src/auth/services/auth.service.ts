@@ -39,7 +39,6 @@ export class AuthService {
           family:true,
           name:true,
           phone:true,
-          isActive:true,
           lastname:true,
           roles:true,
         }
@@ -74,7 +73,6 @@ export class AuthService {
         family: true,
         name: true,
         phone: true,
-        isActive: true,
         lastname: true,
         roles: true
       }
