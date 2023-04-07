@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto, LoginUserDto, UpdateUserDto } from '../dto';
 import { User } from '../entities';
 import { Repository } from 'typeorm';
@@ -25,15 +25,32 @@ export class AuthService {
       const user = this.userRepository.create({
         ...userData,
         password: bcrypt.hashSync(password, 10)
-      }
-      );
+      });
       await this.userRepository.save(user);
-      delete user.password;
+      const res = await this.userRepository.findOne({
+        where: {
+          id:user.id
+        },
+        select: {
+          email: true,
+          password: true,
+          id: true,
+          avatar:true,
+          family:true,
+          name:true,
+          phone:true,
+          isActive:true,
+          lastname:true,
+          roles:true
+        }
+      });
+      if (!res) throw new NotFoundException(`User with id ${user} not found`);
+      delete res.password;
       const response: ResponseApi = {
         success: true,
         message: 'User created successfully!',
         data: {
-          ...user, token: this.getJwyToken({ id: user.id })
+          ...res, token: this.getJwyToken({ id: res.id })
         },
       }
       return response;
@@ -53,7 +70,14 @@ export class AuthService {
       select: {
         email: true,
         password: true,
-        id: true
+        id: true,
+        avatar: true,
+        family: true,
+        name: true,
+        phone: true,
+        isActive: true,
+        lastname: true,
+        roles: true
       }
     });
     if (!user) throw new UnauthorizedException(`Invalid credentials entered`);
