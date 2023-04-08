@@ -17,11 +17,12 @@ export class UserController {
   @Auth(ValidRoles.superUser)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get All' })
-  findAll(@Query() paginationDto:PaginationDto) {
+  findAll(@Query() paginationDto: PaginationDto) {
     return this.userService.findAll(paginationDto);
   }
 
   @Get(':id')
+  @Auth(ValidRoles.user)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get By Id' })
   findOne(@Param('id', UuidV4Pipe) id: string,) {
@@ -30,12 +31,14 @@ export class UserController {
 
   @Put(':id')
   @ApiBearerAuth()
+  @Auth(ValidRoles.user)
   @ApiOperation({ summary: 'Update By Id' })
   update(@Param('id', UuidV4Pipe) id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
+  @Auth(ValidRoles.user)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete By Id' })
   delete(@Param('id', UuidV4Pipe) id: string) {
