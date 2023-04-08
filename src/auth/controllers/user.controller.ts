@@ -29,7 +29,7 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  @Put(':id')
+  @Put('withOutImage/:id')
   @ApiBearerAuth()
   @Auth(ValidRoles.user)
   @ApiOperation({ summary: 'Update By Id' })
