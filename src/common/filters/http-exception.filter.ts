@@ -7,6 +7,7 @@ import {
     Logger,
 } from '@nestjs/common';
 import { ResponseApi } from '../interfaces';
+import { isArray } from 'class-validator';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
@@ -26,10 +27,17 @@ export class AllExceptionFilter implements ExceptionFilter {
             exception instanceof HttpException ? exception.getResponse() : exception;
 
         this.logger.error(`Status ${status} Error: ${JSON.stringify(msg)}`);
+        
+        var message: string = '';
+        if (isArray(msg.message)) {
+            message = msg.message[0];
+        } else {
+            message = msg.message;
+        }
 
         const res: ResponseApi = {
             success: false,
-            message: msg.message,
+            message,
             type: msg.error,
             status: msg.statusCode,
             data: null
