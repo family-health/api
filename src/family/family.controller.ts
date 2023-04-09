@@ -12,7 +12,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 export class FamilyController {
   constructor(private readonly familyService: FamilyService) { }
 
-  @Post()
+  @Post('create')
   @Auth(ValidRoles.user)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create new' })
