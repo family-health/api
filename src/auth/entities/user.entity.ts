@@ -1,5 +1,6 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Family } from "src/family/entities";
+import { HistoryLogin } from "./history_login.entity";
 
 @Entity()
 export class User {
@@ -60,6 +61,13 @@ export class User {
         { cascade: true, eager: true }
     )
     family?: Family[]
+
+    @OneToMany(
+        () => Family,
+        history => history.user,
+        { cascade: true, eager: true }
+    )
+    history_login?: HistoryLogin[]
 
     @BeforeInsert()
     checkFildsBeforeInserts() {

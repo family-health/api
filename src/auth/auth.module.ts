@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthService, UserService } from './services';
-import { User } from './entities';
+import { HistoryLogin, User } from './entities';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -11,7 +11,7 @@ import { AuthController, UserController } from './controllers';
   controllers: [AuthController, UserController],
   providers: [AuthService, UserService, JwtStrategy],
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, HistoryLogin]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [],
