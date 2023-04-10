@@ -1,3 +1,4 @@
+import { HeadersRequest } from './../interfaces';
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto, LoginUserDto, UpdateUserDto } from '../dto';
 import { User } from '../entities';
@@ -18,7 +19,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) { }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto,headers: HeadersRequest) {
 
     try {
       const { password, ...userData } = createUserDto;
@@ -50,14 +51,15 @@ export class AuthService {
         data: {
           ...res, token: this.getJwyToken({ id: res.id })
         },
-      }
+      }      
+      console.log(headers);
       return response;
     } catch (error) {
       this.handleExceptions(error);
     }
   }
 
-  async login(loginUserDto: LoginUserDto) {
+  async login(loginUserDto: LoginUserDto,headers: HeadersRequest) {
 
     const { email, password } = loginUserDto;
 
@@ -88,6 +90,7 @@ export class AuthService {
           ...user, token: this.getJwyToken({ id: user.id })
         },
       }
+      console.log(headers);
       return response;
     } catch (error) {
       this.handleExceptions(error);
