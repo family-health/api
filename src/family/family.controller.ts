@@ -12,11 +12,11 @@ import { FamilyService } from './family.service';
 export class FamilyController {
   constructor(private readonly familyService: FamilyService) { }
 
-  @Get('send-invitacion/:email')
+  @Get('send-invitacion')
   @ApiBearerAuth()
   // @ApiOperation({ summary: 'Get All' })
   @Auth(ValidRoles.user)
-  sendInvitationEmail(@Param('email') email: string) {
+  sendInvitationEmail(@Query('email') email: string) {
     return this.familyService.sendInvitationEmail(email);
   }
 
