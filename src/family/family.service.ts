@@ -1,23 +1,78 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as jwt from 'jsonwebtoken';
+import * as nodemailer from 'nodemailer';
+import { User } from 'src/auth/entities';
+import { PaginationDto } from 'src/common/dto';
+import { ResponseApi } from 'src/common/interfaces';
+import { DataSource, Repository } from 'typeorm';
 import { CreateFamilyDto } from './dto/create-family.dto';
 import { UpdateFamilyDto } from './dto/update-family.dto';
-import { PaginationDto } from 'src/common/dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Family } from './entities';
-import { DataSource, Repository } from 'typeorm';
-import { User } from 'src/auth/entities';
-import { ResponseApi } from 'src/common/interfaces';
+
 
 @Injectable()
 export class FamilyService {
   private readonly logger = new Logger('UserService');
   constructor(
+    private readonly jwtService: JwtService,
     @InjectRepository(Family)
     private readonly familyRepository: Repository<Family>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly dataSource: DataSource,
   ) { }
+
+  async sendInvitationEmail(email: string) {
+    const token = this.jwtService.sign({ email: email });
+    const url_acepted_invitacion = `${process.env.HOST_NAME}/family/accept-invitation/${token}`
+
+    const transporter = nodemailer.createTransport({
+      host: process.env.MAIL_HOST,
+      port: +process.env.MAIL_PORT,
+      secure: Boolean(process.env.MAIL_ENCRYPTION),
+      auth: {
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.MAIL_FROM_ADDRESS,
+      to: email,
+      subject: 'Invitación para ser miembro de la familia',
+      text: `Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Por favor, haz clic en el siguiente botón para aceptar la invitación:`,
+      html: `<p>Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Haz clic en el botón para aceptar la invitación:</p>
+             <a href=${url_acepted_invitacion} style="background-color: #4CAF50; color: white; border: none; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;">
+               Aceptar invitación
+             </a>`,
+    };
+
+    await transporter.sendMail(mailOptions);
+  }
+
+  async aceptInvitationEmail(token: string) {
+    try {
+      // Verificar y decodificar el token
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Validar que el token tenga la información correcta
+      if (typeof decodedToken !== 'object' || decodedToken === null) {
+        throw new BadRequestException('Token no válido');
+      }
+
+      // Agregar al usuario como miembro de la familia
+      // ...
+
+      return { message: 'Invitación aceptada correctamente' };
+    } catch (err) {
+      return { message: 'Token invalido', error: err.message };
+    }
+  }
 
 
   async create(createFamilyDto: CreateFamilyDto) {

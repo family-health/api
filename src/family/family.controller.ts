@@ -1,16 +1,29 @@
-import { Controller, Get, Post, Body, Param, Delete, Query, Put } from '@nestjs/common';
-import { FamilyService } from './family.service';
-import { CreateFamilyDto, UpdateFamilyDto } from './dto';
-import { PaginationDto } from 'src/common/dto';
-import { UuidV4Pipe } from 'src/common/pipes';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/auth/decorators';
 import { ValidRoles } from 'src/auth/enum';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { PaginationDto } from 'src/common/dto';
+import { UuidV4Pipe } from 'src/common/pipes';
+import { CreateFamilyDto, UpdateFamilyDto } from './dto';
+import { FamilyService } from './family.service';
 
 @Controller('family')
 @ApiTags('Family')
 export class FamilyController {
   constructor(private readonly familyService: FamilyService) { }
+
+  @Get('send-invitacion/:email')
+  @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Get All' })
+  @Auth(ValidRoles.user)
+  sendInvitationEmail(@Param('email') email: string) {
+    return this.familyService.sendInvitationEmail(email);
+  }
+
+  @Get('accept-invitation/:token')
+  async acceptInvitation(@Param('token') token: string) {
+    return this.familyService.aceptInvitationEmail(token);
+  }
 
   @Post('create')
   @Auth(ValidRoles.user)
