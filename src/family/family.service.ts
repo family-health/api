@@ -25,27 +25,28 @@ export class FamilyService {
   ) { }
 
   async sendInvitationEmail(email: string) {
-    const token = this.jwtService.sign({ email: email });
+    const token = this.jwtService.sign({ email: email, timestamp: Date.now() });
     const url_acepted_invitacion = `${process.env.HOST_NAME}/family/accept-invitation/${token}`
 
     const transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: +process.env.MAIL_PORT,
-      secure: Boolean(process.env.MAIL_ENCRYPTION),
+      host: 'mail.ebit-software.com',
+      port: 587,
+      secure: false,
       auth: {
-        user: process.env.MAIL_USERNAME,
-        pass: process.env.MAIL_PASSWORD,
+        user: 'no-reply@ebit-software.com',
+        pass: '^Im~CwP8Hp7Q',
       },
       tls: {
         rejectUnauthorized: false,
       },
     });
 
+
     const mailOptions = {
       from: process.env.MAIL_FROM_ADDRESS,
       to: email,
       subject: 'Invitación para ser miembro de la familia',
-      text: `Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Por favor, haz clic en el siguiente botón para aceptar la invitación:`,
+      text: `Hola, has sido invitado a ser miembro de la familia en nuestra aplicación.El token expira en 15 minutos, por favor, haz clic en el siguiente botón para aceptar la invitación:`,
       html: `<p>Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Haz clic en el botón para aceptar la invitación:</p>
              <a href=${url_acepted_invitacion} style="background-color: #4CAF50; color: white; border: none; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;">
                Aceptar invitación
@@ -57,10 +58,12 @@ export class FamilyService {
 
   async aceptInvitationEmail(token: string) {
     try {
-      // Verificar y decodificar el token
-      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET) as { email: string, timestamp: number };
 
-      // Validar que el token tenga la información correcta
+      if (Date.now() - decodedToken.timestamp > 15 * 60 * 1000) {
+        throw new Error('Este token ha expirado');
+      }
+
       if (typeof decodedToken !== 'object' || decodedToken === null) {
         throw new BadRequestException('Token no válido');
       }
