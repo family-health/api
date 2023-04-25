@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/auth/decorators';
 import { ValidRoles } from 'src/auth/enum';
@@ -39,6 +39,14 @@ export class FamilyController {
   @Auth(ValidRoles.user)
   findAll(@Query() paginationDto: PaginationDto) {
     return this.familyService.findAll(paginationDto);
+  }
+
+  @Get('byuserId/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get By UserId' })
+  @Auth(ValidRoles.user)
+  findByIdUser(@Query() paginationDto: PaginationDto, @Param('id', ParseUUIDPipe) idUser: string) {
+    return this.familyService.findByUserId(paginationDto, idUser);
   }
 
   @Get(':id')

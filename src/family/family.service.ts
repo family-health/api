@@ -119,6 +119,33 @@ export class FamilyService {
     }
   }
 
+  async findByUserId(paginationDto: PaginationDto, userId: string) {
+    try {
+      const { limit = 10, offset = 0 } = paginationDto;
+      const families = await this.familyRepository.find({
+        take: limit,
+        skip: offset,
+        relations: {
+          user: false
+        },
+        where:{
+          user:{
+            id: userId
+          }
+        },
+      
+      });
+      const response: ResponseApi = {
+        success: true,
+        message: 'All Family By UserId',
+        data: families,
+      }
+      return response;
+    } catch (error) {
+      this.handleExceptions(error);
+    }
+  }
+
   async findOne(id: string) {
     const family = await this.familyRepository.findOneBy({ id });
     if (!family) throw new NotFoundException(`Family with id ${id} not found`);
