@@ -14,7 +14,7 @@ export class FamilyController {
 
   @Get('send-invitacion')
   @ApiBearerAuth()
-  // @ApiOperation({ summary: 'Get All' })
+  @ApiOperation({ summary: 'Enviar invitacion' })
   @Auth(ValidRoles.user)
   sendInvitationEmail(@Query('email') email: string) {
     return this.familyService.sendInvitationEmail(email);

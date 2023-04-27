@@ -186,8 +186,20 @@ export class FamilyService {
     }
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} family`;
+  async remove(id: string) {
+    const family = await this.familyRepository.findOneBy({ id });
+        if (!family) throw new NotFoundException(`Family with id ${id} not found`);
+        try {
+          const res = await this.familyRepository.delete({ id });
+          const response: ResponseApi = {
+            success: true,
+            message: 'Family removed successfully!',
+            data: res,
+          }
+          return response;
+        } catch (error) {
+          this.handleExceptions(error);
+        }
   }
 
 
