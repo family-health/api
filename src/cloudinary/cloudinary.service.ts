@@ -13,12 +13,7 @@ export class CloudinaryService {
         });
     }
 
-    async uploadImageUserProfile2(file: Express.Multer.File) {
-        const result = await cloudinary.v2.uploader.upload(file.path);
-        return result.secure_url;
-    }
-
-    async uploadImageUserProfile(file: Express.Multer.File): Promise<CloudinaryUploadResult> {
+    uploadImageUserProfile(file: Express.Multer.File): Promise<CloudinaryUploadResult> {
         const uniqueId = uuid.v4();
         return new Promise<CloudinaryUploadResult>((resolve, reject) => {
             cloudinary.v2.uploader.upload_stream({
