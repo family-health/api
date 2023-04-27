@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { FamilyModule } from './family/family.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
     imports: [
@@ -19,6 +20,7 @@ import { FamilyModule } from './family/family.module';
         }),
         AuthModule,
         FamilyModule,
+        CloudinaryModule,
     ]
 })
 export class AppModule { }
