@@ -1,13 +1,14 @@
-import { Body, Controller, Get, Headers, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Headers, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { IncomingHttpHeaders } from 'http';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { UAParser } from 'ua-parser-js';
 import { CreateUserDto, LoginUserDto } from '../dto';
 import { fileFilters } from '../helpers';
 import { HeadersRequest } from '../interfaces';
 import { AuthService } from '../services';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { matches } from 'class-validator';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -38,8 +39,9 @@ export class AuthController {
 
   @Post('signup-with-image')
   @UseInterceptors(FileInterceptor('image', { fileFilter: fileFilters }))
-  async registerWithImage(@UploadedFile() file: Express.Multer.File, createUserDto: CreateUserDto, @Headers() headers: IncomingHttpHeaders) {
-    let user = createUserDto;
+  async registerWithImage(@UploadedFile() file: Express.Multer.File, @Body() createUserDto: any, @Headers() headers: IncomingHttpHeaders) {
+    let user = JSON.parse(createUserDto.user);
+
     const parser = new UAParser();
     const userAgent = headers['user-agent'];
     const result: HeadersRequest = parser.setUA(userAgent).getResult();
@@ -47,10 +49,11 @@ export class AuthController {
     if (file) {
       const { secure_url } = await this.cloudinaryService.uploadImageUserProfile(file);
       if (secure_url) {
-        user = { ...createUserDto, avatar: secure_url };
+        user = { ...user, avatar: secure_url };
       }
     }
-    return this.authService.create(user, result);
+    
+    return await this.authService.create(user, result);
 
   }
 

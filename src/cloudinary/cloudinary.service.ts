@@ -24,7 +24,7 @@ export class CloudinaryService {
                 if (error) {
                     reject(error);
                 }
-                console.log(result);
+                // console.log(result);
                 resolve({
                     secure_url: result.secure_url,
                     public_id: result.public_id
