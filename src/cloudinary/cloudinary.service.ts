@@ -32,4 +32,18 @@ export class CloudinaryService {
             }).end(file.buffer);
         });
     }
+
+    async removeImageByPublicId(publicId: string) {
+        return new Promise((resolve, reject) => {
+            cloudinary.v2.uploader.destroy(publicId, { invalidate: true }, (error, result) => {
+                if (error) {
+                    console.log('error',error);
+                    reject(error);
+                } else {
+                    console.log('result', result);
+                    resolve(result);
+                }
+            });
+        });
+    }
 }

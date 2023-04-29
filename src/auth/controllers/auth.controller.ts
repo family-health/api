@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Headers, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { IncomingHttpHeaders } from 'http';
@@ -8,7 +8,6 @@ import { CreateUserDto, LoginUserDto } from '../dto';
 import { fileFilters } from '../helpers';
 import { HeadersRequest } from '../interfaces';
 import { AuthService } from '../services';
-import { matches } from 'class-validator';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -47,12 +46,12 @@ export class AuthController {
     const result: HeadersRequest = parser.setUA(userAgent).getResult();
 
     if (file) {
-      const { secure_url } = await this.cloudinaryService.uploadImageUserProfile(file);
+      const { secure_url, public_id } = await this.cloudinaryService.uploadImageUserProfile(file);
       if (secure_url) {
-        user = { ...user, avatar: secure_url };
+        user = { ...user, avatar: secure_url, publicIdAvatar: public_id };
       }
     }
-    
+
     return await this.authService.create(user, result);
 
   }
@@ -65,6 +64,14 @@ export class AuthController {
   ) {
     const { secure_url } = await this.cloudinaryService.uploadImageUserProfile(file);
     return secure_url;
+  }
+
+  @Get('test-delete')
+  async testdelete(
+    @Query('id') id: string
+  ) {
+    const result = await this.cloudinaryService.removeImageByPublicId(id);
+    return result;
   }
 
 

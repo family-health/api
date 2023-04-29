@@ -42,6 +42,11 @@ export class User {
     })
     avatar: string;
 
+    @Column('text', {
+        default: null
+    })
+    publicIdAvatar: string;
+
 
     @Column('text', {
         array: true,
