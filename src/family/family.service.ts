@@ -2,15 +2,15 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as jwt from 'jsonwebtoken';
-import * as nodemailer from 'nodemailer';
 import { User } from 'src/auth/entities';
 import { PaginationDto } from 'src/common/dto';
 import { ResponseApi } from 'src/common/interfaces';
+import { EmailService } from 'src/email/email.service';
 import { DataSource, Repository } from 'typeorm';
 import { CreateFamilyDto } from './dto/create-family.dto';
 import { UpdateFamilyDto } from './dto/update-family.dto';
 import { Family } from './entities';
-import { EmailService } from 'src/email/email.service';
+import { isTokenExpired, istokenValid } from './helpers';
 
 
 @Injectable()
@@ -28,54 +28,46 @@ export class FamilyService {
 
   async sendInvitationEmail(email: string) {
     const token = this.jwtService.sign({ email: email, timestamp: Date.now() });
-    const url_acepted_invitacion = `${process.env.HOST_NAME}/family/accept-invitation/${token}`
-
-    const transporter = nodemailer.createTransport({
-      host: 'mail.ebit-software.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: 'no-reply@ebit-software.com',
-        pass: '^Im~CwP8Hp7Q',
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-
-
-    const mailOptions = {
-      from: process.env.MAIL_FROM_ADDRESS,
-      to: email,
-      subject: 'Invitación para ser miembro de la familia',
-      text: `Hola, has sido invitado a ser miembro de la familia en nuestra aplicación.El token expira en 15 minutos, por favor, haz clic en el siguiente botón para aceptar la invitación:`,
-      html: `<p>Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Haz clic en el botón para aceptar la invitación:</p>
+    const url_acepted_invitacion = `${process.env.HOST_NAME}/family/accept-invitation/${token}`;
+    const subject = 'Invitación para ser miembro de la familia';
+    const text = `Hola, has sido invitado a ser miembro de la familia en nuestra aplicación.El token expira en 10 minutos, por favor, haz clic en el siguiente botón para aceptar la invitación:`;
+    const html = `<p>Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Haz clic en el botón para aceptar la invitación:</p>
              <a href=${url_acepted_invitacion} style="background-color: #4CAF50; color: white; border: none; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;">
                Aceptar invitación
-             </a>`,
-    };
+             </a>`;
 
-    await transporter.sendMail(mailOptions);
+    await this.emailService.sendEmail(email, subject, text, html);
   }
 
   async aceptInvitationEmail(token: string) {
     try {
       const decodedToken = jwt.verify(token, process.env.JWT_SECRET) as { email: string, timestamp: number };
 
-      if (Date.now() - decodedToken.timestamp > 15 * 60 * 1000) {
+      if (isTokenExpired(decodedToken.timestamp)) {
         throw new Error('Este token ha expirado');
       }
 
-      if (typeof decodedToken !== 'object' || decodedToken === null) {
+      if (istokenValid(decodedToken)) {
         throw new BadRequestException('Token no válido');
       }
 
       // Agregar al usuario como miembro de la familia
       // ...
 
-      return { message: 'Invitación aceptada correctamente' };
+      const response: ResponseApi = {
+        success: true,
+        message: 'Invitación aceptada correctamente',
+        data: null,
+      }
+      return response;
+
     } catch (err) {
-      return { message: 'Token invalido', error: err.message };
+      const response: ResponseApi = {
+        success: false,
+        message: 'El token es invalido',
+        data: null,
+      }
+      return response;
     }
   }
 
@@ -205,6 +197,7 @@ export class FamilyService {
 
 
   private handleExceptions(error: any) {
+    
     if (error.code === '23505') {
       throw new BadRequestException(error.detail);
     }
