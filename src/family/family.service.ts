@@ -26,50 +26,6 @@ export class FamilyService {
     private readonly emailService: EmailService
   ) { }
 
-  async sendInvitationEmail(email: string) {
-    const token = this.jwtService.sign({ email: email, timestamp: Date.now() });
-    const url_acepted_invitacion = `${process.env.HOST_NAME}/family/accept-invitation/${token}`;
-    const subject = 'Invitación para ser miembro de la familia';
-    const text = `Hola, has sido invitado a ser miembro de la familia en nuestra aplicación.El token expira en 10 minutos, por favor, haz clic en el siguiente botón para aceptar la invitación:`;
-    const html = `<p>Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Haz clic en el botón para aceptar la invitación:</p>
-             <a href=${url_acepted_invitacion} style="background-color: #4CAF50; color: white; border: none; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;">
-               Aceptar invitación
-             </a>`;
-
-    await this.emailService.sendEmail(email, subject, text, html);
-  }
-
-  async aceptInvitationEmail(token: string) {
-    try {
-      const decodedToken = jwt.verify(token, process.env.JWT_SECRET) as { email: string, timestamp: number };
-
-      if (isTokenExpired(decodedToken.timestamp)) {
-        throw new Error('Este token ha expirado');
-      }
-
-      if (istokenValid(decodedToken)) {
-        throw new BadRequestException('Token no válido');
-      }
-
-      // Agregar al usuario como miembro de la familia
-      // ...
-
-      const response: ResponseApi = {
-        success: true,
-        message: 'Invitación aceptada correctamente',
-        data: null,
-      }
-      return response;
-
-    } catch (err) {
-      const response: ResponseApi = {
-        success: false,
-        message: 'El token es invalido',
-        data: null,
-      }
-      return response;
-    }
-  }
 
   async create(createFamilyDto: CreateFamilyDto) {
     const user = await this.userRepository.findOneBy({ id: createFamilyDto.userId });
@@ -80,6 +36,7 @@ export class FamilyService {
         user
       });
       await this.familyRepository.save(family);
+      await this.sendInvitationEmail(createFamilyDto.email);
       const response: ResponseApi = {
         success: true,
         message: 'Family created successfully!',
@@ -195,9 +152,55 @@ export class FamilyService {
     }
   }
 
+  async sendInvitationEmail(email: string) {
+    const token = this.jwtService.sign({ email: email, timestamp: Date.now() });
+    const url_acepted_invitacion = `${process.env.HOST_NAME}/family/accept-invitation/${token}`;
+    const subject = 'Invitación para ser miembro de la familia';
+    const text = `Hola, has sido invitado a ser miembro de la familia en nuestra aplicación.El token expira en 10 minutos, por favor, haz clic en el siguiente botón para aceptar la invitación:`;
+    const html = `<p>Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Haz clic en el botón para aceptar la invitación:</p>
+             <a href=${url_acepted_invitacion} style="background-color: #4CAF50; color: white; border: none; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;">
+               Aceptar invitación
+             </a>`;
+
+    await this.emailService.sendEmail(email, subject, text, html);
+  }
+
+async aceptInvitationEmail(token: string) {
+    try {
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET) as
+        { email: string, timestamp: number };
+
+      if (isTokenExpired(decodedToken.timestamp)) {
+        throw new Error('Este token ha expirado');
+      }
+
+      if (istokenValid(decodedToken)) {
+        throw new BadRequestException('Token no válido');
+      }
+
+      // Agregar al usuario como miembro de la familia
+      // ...
+
+      const response: ResponseApi = {
+        success: true,
+        message: 'Invitación aceptada correctamente',
+        data: null,
+      }
+      return response;
+
+    } catch (err) {
+      const response: ResponseApi = {
+        success: false,
+        message: 'El token es invalido',
+        data: null,
+      }
+      return response;
+    }
+  }
+
 
   private handleExceptions(error: any) {
-    
+
     if (error.code === '23505') {
       throw new BadRequestException(error.detail);
     }

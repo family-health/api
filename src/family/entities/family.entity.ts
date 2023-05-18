@@ -5,7 +5,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 export class Family {
 
     @PrimaryGeneratedColumn('uuid')
-    id:string;
+    id: string;
     @Column('text', {
         nullable: false
     })
@@ -20,14 +20,20 @@ export class Family {
     phone: string;
     @Column('text', {
         nullable: false,
-        unique:true
+        unique: true
     })
     email: string;
     @Column('text', {
         nullable: false,
-        unique:true
+        unique: true
     })
     relation?: string;
+
+    @Column('boolean', {
+        nullable: true,
+        default: false
+    })
+    isVerified: boolean;
 
     @ManyToOne(
         () => User,
