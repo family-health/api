@@ -10,6 +10,7 @@ import { DataSource, Repository } from 'typeorm';
 import { CreateFamilyDto } from './dto/create-family.dto';
 import { UpdateFamilyDto } from './dto/update-family.dto';
 import { Family } from './entities';
+import { EmailService } from 'src/email/email.service';
 
 
 @Injectable()
@@ -22,6 +23,7 @@ export class FamilyService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly dataSource: DataSource,
+    private readonly emailService: EmailService
   ) { }
 
   async sendInvitationEmail(email: string) {
@@ -77,7 +79,6 @@ export class FamilyService {
     }
   }
 
-
   async create(createFamilyDto: CreateFamilyDto) {
     const user = await this.userRepository.findOneBy({ id: createFamilyDto.userId });
     if (!user) throw new NotFoundException(`User with id ${createFamilyDto.userId} not found`);
@@ -128,12 +129,12 @@ export class FamilyService {
         relations: {
           user: false
         },
-        where:{
-          user:{
+        where: {
+          user: {
             id: userId
           }
         },
-      
+
       });
       const response: ResponseApi = {
         success: true,
@@ -188,18 +189,18 @@ export class FamilyService {
 
   async remove(id: string) {
     const family = await this.familyRepository.findOneBy({ id });
-        if (!family) throw new NotFoundException(`Family with id ${id} not found`);
-        try {
-          const res = await this.familyRepository.delete({ id });
-          const response: ResponseApi = {
-            success: true,
-            message: 'Family removed successfully!',
-            data: res,
-          }
-          return response;
-        } catch (error) {
-          this.handleExceptions(error);
-        }
+    if (!family) throw new NotFoundException(`Family with id ${id} not found`);
+    try {
+      const res = await this.familyRepository.delete({ id });
+      const response: ResponseApi = {
+        success: true,
+        message: 'Family removed successfully!',
+        data: res,
+      }
+      return response;
+    } catch (error) {
+      this.handleExceptions(error);
+    }
   }
 
 

@@ -25,6 +25,7 @@ export class FamilyController {
     return this.familyService.aceptInvitationEmail(token);
   }
 
+
   @Post('create')
   @Auth(ValidRoles.user)
   @ApiBearerAuth()
