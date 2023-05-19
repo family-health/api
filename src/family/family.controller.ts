@@ -12,14 +12,6 @@ import { FamilyService } from './family.service';
 export class FamilyController {
   constructor(private readonly familyService: FamilyService) { }
 
-  @Get('send-invitacion')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Enviar invitacion' })
-  @Auth(ValidRoles.user)
-  sendInvitationEmail(@Query('email') email: string) {
-    return this.familyService.sendInvitationEmail(email);
-  }
-
   @Get('accept-invitation/:token')
   async acceptInvitation(@Param('token') token: string) {
     return this.familyService.aceptInvitationEmail(token);
