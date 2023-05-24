@@ -53,7 +53,6 @@ export class AuthService {
           ...res, token: this.getJwyToken({ id: res.id })
         },
       }
-      console.log(headers);
       return response;
     } catch (error) {
       this.handleExceptions(error);
@@ -92,7 +91,6 @@ export class AuthService {
           ...user, token: this.getJwyToken({ id: user.id })
         },
       }
-      console.log(headers);
       return response;
     } catch (error) {
       this.handleExceptions(error);

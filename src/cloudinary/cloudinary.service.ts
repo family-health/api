@@ -24,7 +24,6 @@ export class CloudinaryService {
                 if (error) {
                     reject(error);
                 }
-                // console.log(result);
                 resolve({
                     secure_url: result.secure_url,
                     public_id: result.public_id
@@ -37,10 +36,8 @@ export class CloudinaryService {
         return new Promise((resolve, reject) => {
             cloudinary.v2.uploader.destroy(publicId, { invalidate: true }, (error, result) => {
                 if (error) {
-                    console.log('error',error);
                     reject(error);
                 } else {
-                    console.log('result', result);
                     resolve(result);
                 }
             });
