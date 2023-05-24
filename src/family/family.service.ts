@@ -2,14 +2,15 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as jwt from 'jsonwebtoken';
-import * as nodemailer from 'nodemailer';
 import { User } from 'src/auth/entities';
 import { PaginationDto } from 'src/common/dto';
 import { ResponseApi } from 'src/common/interfaces';
+import { EmailService } from 'src/email/email.service';
 import { DataSource, Repository } from 'typeorm';
 import { CreateFamilyDto } from './dto/create-family.dto';
 import { UpdateFamilyDto } from './dto/update-family.dto';
 import { Family } from './entities';
+import { isTokenExpired, istokenValid } from './helpers';
 
 
 @Injectable()
@@ -22,60 +23,8 @@ export class FamilyService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly dataSource: DataSource,
+    private readonly emailService: EmailService
   ) { }
-
-  async sendInvitationEmail(email: string) {
-    const token = this.jwtService.sign({ email: email, timestamp: Date.now() });
-    const url_acepted_invitacion = `${process.env.HOST_NAME}/family/accept-invitation/${token}`
-
-    const transporter = nodemailer.createTransport({
-      host: 'mail.ebit-software.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: 'no-reply@ebit-software.com',
-        pass: '^Im~CwP8Hp7Q',
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-
-
-    const mailOptions = {
-      from: process.env.MAIL_FROM_ADDRESS,
-      to: email,
-      subject: 'Invitación para ser miembro de la familia',
-      text: `Hola, has sido invitado a ser miembro de la familia en nuestra aplicación.El token expira en 15 minutos, por favor, haz clic en el siguiente botón para aceptar la invitación:`,
-      html: `<p>Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Haz clic en el botón para aceptar la invitación:</p>
-             <a href=${url_acepted_invitacion} style="background-color: #4CAF50; color: white; border: none; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;">
-               Aceptar invitación
-             </a>`,
-    };
-
-    await transporter.sendMail(mailOptions);
-  }
-
-  async aceptInvitationEmail(token: string) {
-    try {
-      const decodedToken = jwt.verify(token, process.env.JWT_SECRET) as { email: string, timestamp: number };
-
-      if (Date.now() - decodedToken.timestamp > 15 * 60 * 1000) {
-        throw new Error('Este token ha expirado');
-      }
-
-      if (typeof decodedToken !== 'object' || decodedToken === null) {
-        throw new BadRequestException('Token no válido');
-      }
-
-      // Agregar al usuario como miembro de la familia
-      // ...
-
-      return { message: 'Invitación aceptada correctamente' };
-    } catch (err) {
-      return { message: 'Token invalido', error: err.message };
-    }
-  }
 
 
   async create(createFamilyDto: CreateFamilyDto) {
@@ -87,6 +36,7 @@ export class FamilyService {
         user
       });
       await this.familyRepository.save(family);
+      await this.sendInvitationEmail(createFamilyDto.email);
       const response: ResponseApi = {
         success: true,
         message: 'Family created successfully!',
@@ -128,12 +78,12 @@ export class FamilyService {
         relations: {
           user: false
         },
-        where:{
-          user:{
+        where: {
+          user: {
             id: userId
           }
         },
-      
+
       });
       const response: ResponseApi = {
         success: true,
@@ -188,22 +138,91 @@ export class FamilyService {
 
   async remove(id: string) {
     const family = await this.familyRepository.findOneBy({ id });
-        if (!family) throw new NotFoundException(`Family with id ${id} not found`);
-        try {
-          const res = await this.familyRepository.delete({ id });
-          const response: ResponseApi = {
-            success: true,
-            message: 'Family removed successfully!',
-            data: res,
-          }
-          return response;
-        } catch (error) {
-          this.handleExceptions(error);
+    if (!family) throw new NotFoundException(`Family with id ${id} not found`);
+    try {
+      const res = await this.familyRepository.delete({ id });
+      const response: ResponseApi = {
+        success: true,
+        message: 'Family removed successfully!',
+        data: res,
+      }
+      return response;
+    } catch (error) {
+      this.handleExceptions(error);
+    }
+  }
+
+  async sendInvitationEmail(email: string) {
+    const family = await this.familyRepository.findOneBy({  email});
+    if (!family) throw new NotFoundException(`Family with email ${email} not found`);
+    const token = this.jwtService.sign({ email: email, timestamp: Date.now() });
+    const url_acepted_invitacion = `${process.env.HOST_NAME}/family/accept-invitation/${token}`;
+    const subject = 'Invitación para ser miembro de la familia';
+    const text = `Hola, has sido invitado a ser miembro de la familia en nuestra aplicación.El token expira en 10 minutos, por favor, haz clic en el siguiente botón para aceptar la invitación:`;
+    const html = `<p>Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Haz clic en el botón para aceptar la invitación:</p>
+             <a href=${url_acepted_invitacion} style="background-color: #4CAF50; color: white; border: none; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;">
+               Aceptar invitación
+             </a>`;
+
+    try {
+      await this.emailService.sendEmail(email, subject, text, html);
+      const response: ResponseApi = {
+        success: true,
+        message: 'Invitación enviada correctamente',
+        data: null,
+      }
+      return response;
+    } catch (error) {
+      this.handleExceptions(error);
+    }
+  }
+
+  async aceptInvitationEmail(token: string) {
+    try {
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET) as
+        { email: string, timestamp: number };
+
+      if (isTokenExpired(decodedToken.timestamp)) {
+        throw new Error('Este token ha expirado');
+      }
+
+      if (istokenValid(decodedToken)) {
+        throw new BadRequestException('Token no válido');
+      }
+
+      // Cambiar estado de familiar de inactivo a activo
+      const person = await this.familyRepository.find({ where: { email: decodedToken.email } });
+      if (!person) throw new NotFoundException(`Family not found`);
+
+      try {
+        const newPerson = person[0];
+        newPerson.isVerified = true;
+        await this.familyRepository.update(newPerson.id, newPerson);
+
+        const response: ResponseApi = {
+          success: true,
+          message: 'Invitación aceptada correctamente',
+          data: newPerson,
         }
+        return response;
+      } catch (error) {
+        this.handleExceptions(error);
+      }
+
+
+    } catch (err) {
+      const response: ResponseApi = {
+        success: false,
+        message: 'El token es invalido',
+        data: null,
+      }
+      return response;
+    }
   }
 
 
   private handleExceptions(error: any) {
+
     if (error.code === '23505') {
       throw new BadRequestException(error.detail);
     }

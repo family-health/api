@@ -9,7 +9,6 @@ export const fileFilters = (req: Express.Request, file: Express.Multer.File, cal
     if (!validExtensions.includes(fileType)) {
         return callback(new Error('Invalid file type. Only PNG, JPG and JPEG are allowed.'), false);
     }
-    console.log(file);
     
 
     // Validar tamaño de archivo
