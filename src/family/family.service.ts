@@ -153,6 +153,8 @@ export class FamilyService {
   }
 
   async sendInvitationEmail(email: string) {
+    const family = await this.familyRepository.findOneBy({  email});
+    if (!family) throw new NotFoundException(`Family with email ${email} not found`);
     const token = this.jwtService.sign({ email: email, timestamp: Date.now() });
     const url_acepted_invitacion = `${process.env.HOST_NAME}/family/accept-invitation/${token}`;
     const subject = 'Invitación para ser miembro de la familia';
@@ -165,7 +167,7 @@ export class FamilyService {
     await this.emailService.sendEmail(email, subject, text, html);
   }
 
-async aceptInvitationEmail(token: string) {
+  async aceptInvitationEmail(token: string) {
     try {
       const decodedToken = jwt.verify(token, process.env.JWT_SECRET) as
         { email: string, timestamp: number };
@@ -178,15 +180,25 @@ async aceptInvitationEmail(token: string) {
         throw new BadRequestException('Token no válido');
       }
 
-      // Agregar al usuario como miembro de la familia
-      // ...
+      // Cambiar estado de familiar de inactivo a activo
+      const person = await this.familyRepository.find({ where: { email: decodedToken.email } });
+      if (!person) throw new NotFoundException(`Family not found`);
 
-      const response: ResponseApi = {
-        success: true,
-        message: 'Invitación aceptada correctamente',
-        data: null,
+      try {
+        const newPerson = person[0];
+        newPerson.isVerified = true;
+        await this.familyRepository.update(newPerson.id, newPerson);
+
+        const response: ResponseApi = {
+          success: true,
+          message: 'Invitación aceptada correctamente',
+          data: newPerson,
+        }
+        return response;
+      } catch (error) {
+        this.handleExceptions(error);
       }
-      return response;
+
 
     } catch (err) {
       const response: ResponseApi = {
