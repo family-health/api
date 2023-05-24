@@ -12,12 +12,6 @@ import { FamilyService } from './family.service';
 export class FamilyController {
   constructor(private readonly familyService: FamilyService) { }
 
-  @Get('accept-invitation/:token')
-  async acceptInvitation(@Param('token') token: string) {
-    return this.familyService.aceptInvitationEmail(token);
-  }
-
-
   @Post('create')
   @Auth(ValidRoles.user)
   @ApiBearerAuth()
@@ -64,5 +58,18 @@ export class FamilyController {
   @Auth(ValidRoles.user)
   remove(@Param('id', UuidV4Pipe) id: string) {
     return this.familyService.remove(id);
+  }
+
+  @Get('accept-invitation/:token')
+  @ApiOperation({ summary: 'Acept for be family' })
+  async acceptInvitation(@Param('token') token: string) {
+    return this.familyService.aceptInvitationEmail(token);
+  }
+
+  @Get('send-invitation/:email')
+  @Auth(ValidRoles.user)
+  @ApiOperation({ summary: 'Send invitation for be family' })
+  async sendInvitation(@Param('email') email: string) {
+    return this.familyService.sendInvitationEmail(email);
   }
 }

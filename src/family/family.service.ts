@@ -164,7 +164,17 @@ export class FamilyService {
                Aceptar invitación
              </a>`;
 
-    await this.emailService.sendEmail(email, subject, text, html);
+    try {
+      await this.emailService.sendEmail(email, subject, text, html);
+      const response: ResponseApi = {
+        success: true,
+        message: 'Invitación enviada correctamente',
+        data: null,
+      }
+      return response;
+    } catch (error) {
+      this.handleExceptions(error);
+    }
   }
 
   async aceptInvitationEmail(token: string) {
