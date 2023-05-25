@@ -25,7 +25,7 @@ export class Family {
     email: string;
     @Column('text', {
         nullable: false,
-        unique: true
+        unique: false
     })
     relation?: string;
 
