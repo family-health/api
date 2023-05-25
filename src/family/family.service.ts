@@ -10,7 +10,7 @@ import { DataSource, Repository } from 'typeorm';
 import { CreateFamilyDto } from './dto/create-family.dto';
 import { UpdateFamilyDto } from './dto/update-family.dto';
 import { Family } from './entities';
-import { isTokenExpired, istokenValid } from './helpers';
+import { invitationAcceptedSuccessfullyHtml, invitationIncorrectlyAccepted, isTokenExpired, istokenValid } from './helpers';
 
 
 @Injectable()
@@ -153,16 +153,20 @@ export class FamilyService {
   }
 
   async sendInvitationEmail(email: string) {
-    const family = await this.familyRepository.findOneBy({  email});
+    const family = await this.familyRepository.findOneBy({ email });
     if (!family) throw new NotFoundException(`Family with email ${email} not found`);
     const token = this.jwtService.sign({ email: email, timestamp: Date.now() });
     const url_acepted_invitacion = `${process.env.HOST_NAME}/family/accept-invitation/${token}`;
     const subject = 'Invitación para ser miembro de la familia';
     const text = `Hola, has sido invitado a ser miembro de la familia en nuestra aplicación.El token expira en 10 minutos, por favor, haz clic en el siguiente botón para aceptar la invitación:`;
-    const html = `<p>Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Haz clic en el botón para aceptar la invitación:</p>
-             <a href=${url_acepted_invitacion} style="background-color: #4CAF50; color: white; border: none; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;">
-               Aceptar invitación
-             </a>`;
+    const html = `
+      <p>Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Haz clic en el botón para aceptar la invitación:</p>
+      <div style="display: flex; justify-content: center;">
+        <a href=${url_acepted_invitacion} style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 14px; margin: 30px 4px 4px; cursor: pointer; border-radius: 5px;">
+          Aceptar invitación
+        </a>
+      </div>
+    `;
 
     try {
       await this.emailService.sendEmail(email, subject, text, html);
@@ -199,24 +203,14 @@ export class FamilyService {
         newPerson.isVerified = true;
         await this.familyRepository.update(newPerson.id, newPerson);
 
-        const response: ResponseApi = {
-          success: true,
-          message: 'Invitación aceptada correctamente',
-          data: newPerson,
-        }
-        return response;
+        const htmlResponse = invitationAcceptedSuccessfullyHtml
+        return htmlResponse;
       } catch (error) {
         this.handleExceptions(error);
       }
-
-
     } catch (err) {
-      const response: ResponseApi = {
-        success: false,
-        message: 'El token es invalido',
-        data: null,
-      }
-      return response;
+      const htmlResponse = invitationIncorrectlyAccepted;
+      return htmlResponse;
     }
   }
 
