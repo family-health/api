@@ -38,8 +38,8 @@ export class AllExceptionFilter implements ExceptionFilter {
         const res: ResponseApi = {
             success: false,
             message,
-            type: msg.error,
-            status: msg.statusCode,
+            // type: msg.error,
+            // status: msg.statusCode,
             data: null
         }
         response.status(status).json(res);
