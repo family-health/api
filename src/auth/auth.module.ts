@@ -3,17 +3,17 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController, UserController } from './controllers';
-import { HistoryLogin, User } from './entities';
 import { AuthService, UserService } from './services';
 import { JwtStrategy } from './strategies';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { User } from './entities';
 
 @Module({
   controllers: [AuthController, UserController],
   providers: [AuthService, UserService, JwtStrategy, CloudinaryService],
   imports: [
 
-    TypeOrmModule.forFeature([User, HistoryLogin]),
+    TypeOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [],
