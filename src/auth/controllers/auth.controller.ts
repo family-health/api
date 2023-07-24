@@ -8,12 +8,14 @@ import { CreateUserDto, LoginUserDto } from '../dto';
 import { fileFilters } from '../helpers';
 import { HeadersRequest } from '../interfaces';
 import { AuthService } from '../services';
+import { TwilioService } from 'src/twilio/twilio.service';
 
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly twilioService: TwilioService,
     private readonly cloudinaryService: CloudinaryService,
   ) { }
 
@@ -74,5 +76,12 @@ export class AuthController {
     return result;
   }
 
+
+
+  @Get('sms')
+  testsms() {
+    
+    return this.twilioService.sendWhatsAppMessage('+593960091634','este es ejemplo de la api espectacular que hizo velkin')
+  }
 
 }
