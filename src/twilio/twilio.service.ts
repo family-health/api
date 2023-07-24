@@ -16,9 +16,9 @@ export class TwilioService {
     async sendSMS(to: string, body: string) {
         try {
             const message = await this.twilioClient.messages.create({
-                body,
-                to,
-                from: process.env.TWILIO_PHONE_NUMBER,
+                body: 'test desde web',
+                from: '+12707166551',
+                to: '+593967433809'
             });
 
             return message;
