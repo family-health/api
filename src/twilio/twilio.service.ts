@@ -3,6 +3,9 @@ import * as Twilio from 'twilio';
 
 @Injectable()
 export class TwilioService {
+
+    private numberWhatsaap: string = '+14155238886';
+
     private readonly twilioClient: Twilio.Twilio;
 
     constructor() {
@@ -16,9 +19,9 @@ export class TwilioService {
     async sendSMS(to: string, body: string) {
         try {
             const message = await this.twilioClient.messages.create({
-                body: 'test desde web',
-                from: '+12707166551',
-                to: '+593967433809'
+                body,
+                to,
+                from: process.env.TWILIO_PHONE_NUMBER,
             });
 
             return message;
@@ -33,7 +36,7 @@ export class TwilioService {
             const message = await this.twilioClient.messages.create({
                 body,
                 to: `whatsapp:${to}`,
-                from: `whatsapp:${process.env.TWILIO_PHONE_NUMBER}`,
+                from: `whatsapp:${this.numberWhatsaap}`,
             });
 
             return message;
