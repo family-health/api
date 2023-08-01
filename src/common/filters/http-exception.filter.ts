@@ -39,7 +39,7 @@ export class AllExceptionFilter implements ExceptionFilter {
             success: false,
             message,
             // type: msg.error,
-            // status: msg.statusCode,
+            status: msg.statusCode,
             data: null
         }
         response.status(status).json(res);

@@ -48,6 +48,7 @@ export class AuthService {
       if (!res) throw new NotFoundException(`User with id ${user} not found`);
       const response: ResponseApi = {
         success: true,
+        status: 200,
         message: 'User created successfully!',
         data: {
           ...res, token: this.getJwyToken({ id: res.id })
@@ -85,6 +86,7 @@ export class AuthService {
 
     try {
       const response: ResponseApi = {
+        status:200,
         success: true,
         message: 'User authenticated successfully!',
         data: {

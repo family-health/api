@@ -3,5 +3,5 @@ export interface ResponseApi {
     message: string;
     data: any;
     type?: string;
-    status?: number;
+    status: number;
 }

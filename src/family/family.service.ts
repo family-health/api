@@ -38,6 +38,7 @@ export class FamilyService {
       await this.familyRepository.save(family);
       await this.sendInvitationEmail(createFamilyDto.email);
       const response: ResponseApi = {
+        status:200,
         success: true,
         message: 'Family created successfully!',
         data: family,
@@ -59,6 +60,7 @@ export class FamilyService {
         }
       });
       const response: ResponseApi = {
+        status:200,
         success: true,
         message: 'All Family',
         data: families,
@@ -86,6 +88,7 @@ export class FamilyService {
 
       });
       const response: ResponseApi = {
+        status:200,
         success: true,
         message: 'All Family By UserId',
         data: families,
@@ -100,6 +103,7 @@ export class FamilyService {
     const family = await this.familyRepository.findOneBy({ id });
     if (!family) throw new NotFoundException(`Family with id ${id} not found`);
     const response: ResponseApi = {
+      status:200,
       success: true,
       message: 'Family found!',
       data: family,
@@ -124,6 +128,7 @@ export class FamilyService {
       await queryRunner.release();
       const res = await this.familyRepository.findOneBy({ id });
       const response: ResponseApi = {
+        status:200,
         success: true,
         message: 'Family modified successfully!',
         data: res,
@@ -145,6 +150,7 @@ export class FamilyService {
         success: true,
         message: 'Family removed successfully!',
         data: res,
+        status:200
       }
       return response;
     } catch (error) {
@@ -174,6 +180,7 @@ export class FamilyService {
         success: true,
         message: 'Invitación enviada correctamente',
         data: null,
+        status:200
       }
       return response;
     } catch (error) {

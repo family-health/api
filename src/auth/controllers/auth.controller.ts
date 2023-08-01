@@ -81,7 +81,7 @@ export class AuthController {
   @Get('sms')
   testsms() {
     
-    return this.twilioService.sendWhatsAppMessage('+593978757580','este es ejemplo de la api espectacular que hizo velkin')
+    return this.twilioService.sendSMS('+593960091634','este es ejemplo de la api espectacular que hizo velkin')
   }
 
 }

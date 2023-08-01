@@ -28,6 +28,7 @@ export class UserService {
             });
 
             const response: ResponseApi = {
+                status:200,
                 success: true,
                 message: 'All users!',
                 data: users,
@@ -42,6 +43,7 @@ export class UserService {
         const user = await this.userRepository.findOneBy({ id });
         if (!user) throw new NotFoundException(`User with id ${id} not found`);
         const response: ResponseApi = {
+            status:200,
             success: true,
             message: 'User Found!',
             data: user,
@@ -70,6 +72,7 @@ export class UserService {
             await queryRunner.commitTransaction();
             await queryRunner.release();
             const response: ResponseApi = {
+                status:200,
                 success: true,
                 message: 'User modificated successfully!',
                 data: user,
