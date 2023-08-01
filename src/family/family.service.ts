@@ -162,7 +162,7 @@ export class FamilyService {
     const family = await this.familyRepository.findOneBy({ email });
     if (!family) throw new NotFoundException(`Family with email ${email} not found`);
     const token = this.jwtService.sign({ email: email, timestamp: Date.now() });
-    const url_acepted_invitacion = `${process.env.HOST_NAME}/family/accept-invitation/${token}`;
+    const url_acepted_invitacion = `${process.env.HOST_NAME}/api/family/accept-invitation/${token}`;
     const subject = 'Invitación para ser miembro de la familia';
     const text = `Hola, has sido invitado a ser miembro de la familia en nuestra aplicación.El token expira en 10 minutos, por favor, haz clic en el siguiente botón para aceptar la invitación:`;
     const html = `
