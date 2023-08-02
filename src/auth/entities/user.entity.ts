@@ -1,5 +1,6 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Family } from "src/family/entities";
+import { WatchHealthDatum } from "src/health-data/entities";
 
 @Entity()
 export class User {
@@ -60,6 +61,15 @@ export class User {
         { cascade: true, eager: true }
     )
     family?: Family[]
+
+    @OneToMany(() => WatchHealthDatum, healthDatum => healthDatum.user)
+    watchHealthData: WatchHealthDatum[];
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
 
 
     @BeforeInsert()

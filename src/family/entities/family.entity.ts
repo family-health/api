@@ -1,5 +1,5 @@
 import { User } from "src/auth/entities";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class Family {
@@ -41,4 +41,11 @@ export class Family {
         { onDelete: 'CASCADE' }
     )
     user: User
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
+
 }

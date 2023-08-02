@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { FamilyModule } from './family/family.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EmailModule } from './email/email.module';
+import { HealthDataModule } from './health-data/health-data.module';
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import { EmailModule } from './email/email.module';
         FamilyModule,
         CloudinaryModule,
         EmailModule,
+        HealthDataModule,
     ]
 })
 export class AppModule { }

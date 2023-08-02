@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsString } from "class-validator";
+import { IsEmail, IsString, IsUUID } from "class-validator";
 
 export class CreateFamilyDto {
     @IsString()
@@ -24,6 +24,7 @@ export class CreateFamilyDto {
     relation: string;
     
     @IsString()
+    @IsUUID('4')
     @ApiProperty()
     userId: string
 }
