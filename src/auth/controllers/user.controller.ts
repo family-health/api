@@ -6,7 +6,6 @@ import { UuidV4Pipe } from "src/common/pipes";
 import { PaginationDto } from "src/common/dto";
 import { Auth } from "../decorators";
 import { ValidRoles } from "../enum";
-import { TwilioService } from "src/twilio/twilio.service";
 
 @Controller('user')
 @ApiTags('User')

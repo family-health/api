@@ -7,13 +7,11 @@ import { AuthService, UserService } from './services';
 import { JwtStrategy } from './strategies';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { User } from './entities';
-import { TwilioModule } from 'src/twilio/twilio.module';
 
 @Module({
   controllers: [AuthController, UserController],
   providers: [AuthService, UserService, JwtStrategy, CloudinaryService],
   imports: [
-    TwilioModule,
     TypeOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

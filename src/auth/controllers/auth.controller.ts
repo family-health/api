@@ -8,14 +8,12 @@ import { CreateUserDto, LoginUserDto } from '../dto';
 import { fileFilters } from '../helpers';
 import { HeadersRequest } from '../interfaces';
 import { AuthService } from '../services';
-import { TwilioService } from 'src/twilio/twilio.service';
 
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly twilioService: TwilioService,
     private readonly cloudinaryService: CloudinaryService,
   ) { }
 
@@ -59,29 +57,5 @@ export class AuthController {
   }
 
 
-  @Post('test')
-  @UseInterceptors(FileInterceptor('image', { fileFilter: fileFilters }))
-  async test(
-    @UploadedFile() file: Express.Multer.File
-  ) {
-    const { secure_url } = await this.cloudinaryService.uploadImageUserProfile(file);
-    return secure_url;
-  }
-
-  @Get('test-delete')
-  async testdelete(
-    @Query('id') id: string
-  ) {
-    const result = await this.cloudinaryService.removeImageByPublicId(id);
-    return result;
-  }
-
-
-
-  @Get('sms')
-  testsms() {
-    
-    return this.twilioService.sendSMS('+593960091634','este es ejemplo de la api espectacular que hizo velkin')
-  }
 
 }
