@@ -3,11 +3,12 @@ import { PaginationDto } from 'src/common/dto';
 import { CreateWatchHealthDatumDto } from './dto/create-watch-health-datum.dto';
 import { UpdateWatchHealthDatumDto } from './dto/update-watch-health-datum.dto';
 import { HealthDataService } from './health-data.service';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/auth/decorators';
 import { ValidRoles } from 'src/auth/enum';
 
 @Controller('health-data')
+@ApiTags('HealthData')
 export class HealthDataController {
   constructor(private readonly healthDataService: HealthDataService) { }
 
