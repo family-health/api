@@ -12,12 +12,14 @@ export class HealthDataController {
   constructor(private readonly healthDataService: HealthDataService) { }
 
   @Post("/create")
+  @ApiBearerAuth()
   @Auth(ValidRoles.user)
   create(@Body() createWatchHealthDatumDto: CreateWatchHealthDatumDto) {
     return this.healthDataService.create(createWatchHealthDatumDto);
   }
 
   @Get()
+  @ApiBearerAuth()
   @Auth(ValidRoles.user)
   findAll(@Query() paginationDto: PaginationDto) {
     return this.healthDataService.findAll(paginationDto);
@@ -31,6 +33,7 @@ export class HealthDataController {
     return this.healthDataService.findByUserId(paginationDto, idUser);
   }
 
+  @ApiBearerAuth()
   @Get(':id')
   @Auth(ValidRoles.user)
   findOne(@Param('id', ParseUUIDPipe) id: string) {
@@ -39,6 +42,7 @@ export class HealthDataController {
 
 
   @Delete(':id')
+  @ApiBearerAuth()
   @Auth(ValidRoles.user)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.healthDataService.remove(id);
