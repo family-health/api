@@ -2,6 +2,7 @@ import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany
 import { Family } from "src/family/entities";
 import { WatchHealthDatum } from "src/health-data/entities";
 
+
 @Entity()
 export class User {
     @PrimaryGeneratedColumn('uuid')
@@ -42,6 +43,26 @@ export class User {
     })
     avatar: string;
 
+    @Column('double precision', {
+        default: null
+    })
+    height: number;
+
+    @Column('double precision', {
+        default: null
+    })
+    weight: number;
+    
+    @Column('text', {
+        default: null
+    })
+    gender: string;
+
+    @Column('date', {
+        default: null
+    })
+    birth: Date;
+  
 
     @Column('text', {
         array: true,

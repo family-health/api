@@ -29,11 +29,22 @@ export class Family {
     })
     relation?: string;
 
+    @Column('text', {
+        default: null
+    })
+    avatar: string;
+
     @Column('boolean', {
         nullable: true,
         default: false
     })
     isVerified: boolean;
+
+    @Column('boolean', {
+        nullable: true,
+        default: false
+    })
+    isEmergency: boolean;
 
     @ManyToOne(
         () => User,
