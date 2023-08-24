@@ -42,6 +42,10 @@ export class AuthService {
           name: true,
           phone: true,
           lastname: true,
+          birth: true,
+          gender: true,
+          height: true,
+          weight: true,
           roles: true,
         }
       });
@@ -78,7 +82,11 @@ export class AuthService {
         name: true,
         phone: true,
         lastname: true,
-        roles: true
+        birth: true,
+        gender: true,
+        height: true,
+        weight: true,
+        roles: true,
       }
     });
     if (!user) throw new UnauthorizedException(`Invalid credentials entered`);
