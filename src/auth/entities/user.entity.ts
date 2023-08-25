@@ -20,13 +20,13 @@ export class User {
 
 
     @Column('text', {
-        unique: true,
+        unique: false,
         nullable: false
     })
     email: string;
 
     @Column('text', {
-        unique: true,
+        unique: false,
         nullable: false
     })
     phone: string;
