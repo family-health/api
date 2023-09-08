@@ -7,14 +7,24 @@ export class WatchHealthDatum {
     id: string;
 
     @Column('text', {
-        nullable: false
+        nullable: true
     })
-    value: string;
+    code: string;
 
     @Column('text', {
         nullable: false
     })
     type: string;
+
+     @Column('text', {
+        nullable: true
+    })
+    unit: string;
+
+    @Column('text', {
+        nullable: false
+    })
+    value: string;
     
     @ManyToOne(() => User, user => user.watchHealthData)
     user: User;

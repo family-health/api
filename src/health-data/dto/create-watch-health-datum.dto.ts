@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsUUID } from "class-validator";
+import { IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateWatchHealthDatumDto {
     @IsString()
@@ -9,6 +9,16 @@ export class CreateWatchHealthDatumDto {
     @IsString()
     @ApiProperty()
     type: string
+
+    @IsString()
+    @IsOptional()
+    @ApiProperty()
+    code: string
+
+    @IsString()
+    @ApiProperty()
+    @IsOptional()
+    unit: string
 
     @IsString()
     @IsUUID('4')
