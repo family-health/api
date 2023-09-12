@@ -36,25 +36,25 @@ export class AuthController {
   }
 
 
-  @Post('signup-with-image')
-  @UseInterceptors(FileInterceptor('image', { fileFilter: fileFilters }))
-  async registerWithImage(@UploadedFile() file: Express.Multer.File, @Body() createUserDto: any, @Headers() headers: IncomingHttpHeaders) {
-    let user = JSON.parse(createUserDto.user);
+  // @Post('signup-with-image')
+  // @UseInterceptors(FileInterceptor('image', { fileFilter: fileFilters }))
+  // async registerWithImage(@UploadedFile() file: Express.Multer.File, @Body() createUserDto: any, @Headers() headers: IncomingHttpHeaders) {
+  //   let user = JSON.parse(createUserDto.user);
 
-    const parser = new UAParser();
-    const userAgent = headers['user-agent'];
-    const result: HeadersRequest = parser.setUA(userAgent).getResult();
+  //   const parser = new UAParser();
+  //   const userAgent = headers['user-agent'];
+  //   const result: HeadersRequest = parser.setUA(userAgent).getResult();
 
-    if (file) {
-      const { secure_url, public_id } = await this.cloudinaryService.uploadImageUserProfile(file);
-      if (secure_url) {
-        user = { ...user, avatar: secure_url, publicIdAvatar: public_id };
-      }
-    }
+  //   if (file) {
+  //     const { secure_url, public_id } = await this.cloudinaryService.uploadImageUserProfile(file);
+  //     if (secure_url) {
+  //       user = { ...user, avatar: secure_url, publicIdAvatar: public_id };
+  //     }
+  //   }
 
-    return await this.authService.create(user, result);
+  //   return await this.authService.create(user, result);
 
-  }
+  // }
 
 
 
