@@ -1,19 +1,19 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsString, IsUUID } from "class-validator";
+import { IsNumber, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateWatchHealthDatumDto {
-    @IsString()
+    @IsNumber()
     @ApiProperty()
-    value: string
+    value: number
 
     @IsString()
     @ApiProperty()
     type: string
 
-    @IsString()
+    @IsNumber()
     @IsOptional()
     @ApiProperty()
-    code: string
+    code: number
 
     @IsString()
     @ApiProperty()

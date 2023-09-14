@@ -9,7 +9,7 @@ export class WatchHealthDatum {
     @Column('text', {
         nullable: true
     })
-    code: string;
+    code: number;
 
     @Column('text', {
         nullable: false
@@ -24,7 +24,7 @@ export class WatchHealthDatum {
     @Column('text', {
         nullable: false
     })
-    value: string;
+    value: number;
     
     @ManyToOne(() => User, user => user.watchHealthData)
     user: User;
