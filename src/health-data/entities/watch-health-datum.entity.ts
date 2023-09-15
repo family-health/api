@@ -6,7 +6,7 @@ export class WatchHealthDatum {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column('text', {
+    @Column('number', {
         nullable: true
     })
     code: number;
@@ -21,7 +21,7 @@ export class WatchHealthDatum {
     })
     unit: string;
 
-    @Column('text', {
+    @Column('number', {
         nullable: false
     })
     value: number;

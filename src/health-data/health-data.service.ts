@@ -48,7 +48,7 @@ export class HealthDataService {
         take: limit,
         skip: offset,
         relations: {
-          user: true
+          user: false
         }
       });
       const response: ResponseApi = {
