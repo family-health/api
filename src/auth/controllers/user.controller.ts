@@ -14,7 +14,7 @@ export class UserController {
 
 
   @Get()
-  @Auth(ValidRoles.superUser)
+  @Auth(ValidRoles.admin)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get All' })
   findAll(@Query() paginationDto: PaginationDto) {
