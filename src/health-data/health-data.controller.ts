@@ -52,7 +52,7 @@ export class HealthDataController {
 
   @Get('getpromedioByTime/userId/:id/type/:type/startDate/:startDate/endDate/:endDate')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get By UserId' })
+  @ApiOperation({ summary: 'Get Promedio By IdUser And Type' })
   @Auth(ValidRoles.user)
   getPromedioByIdUserAndType(
     @Query() paginationDto: PaginationDto, 
@@ -70,7 +70,7 @@ export class HealthDataController {
 
   @Get('getpromedioAllTime/userId/:id/type/:type')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Promedio de salud de siempre' })
+  @ApiOperation({ summary: 'get Promedio By IdUser And Type All Time' })
   @Auth(ValidRoles.user)
   getPromedioByIdUserAndTypeAllTime(
     @Query() paginationDto: PaginationDto, 
