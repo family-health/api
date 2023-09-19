@@ -6,6 +6,7 @@ import { HealthDataService } from './health-data.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/auth/decorators';
 import { ValidRoles } from 'src/auth/enum';
+import { DateValidationPipe } from 'src/common/pipes';
 
 @Controller('health-data')
 @ApiTags('HealthData')
@@ -47,5 +48,35 @@ export class HealthDataController {
   @Auth(ValidRoles.user)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.healthDataService.remove(id);
+  }
+
+  @Get('getpromedioByTime/userId/:id/type/:type/startDate/:startDate/endDate/:endDate')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get By UserId' })
+  @Auth(ValidRoles.user)
+  getPromedioByIdUserAndType(
+    @Query() paginationDto: PaginationDto, 
+    @Param('id', ParseUUIDPipe) idUser: string, 
+    @Param('type') type: string,
+    @Param('startDate', DateValidationPipe) startDate: Date,
+    @Param('endDate', DateValidationPipe) endDate: Date
+    ) {
+      console.log(startDate);
+      console.log(endDate);
+      
+    return this.healthDataService.getPromedioByIdUserAndTypeByTime(paginationDto, idUser, type, startDate, endDate);
+  }
+
+
+  @Get('getpromedioAllTime/userId/:id/type/:type')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Promedio de salud de siempre' })
+  @Auth(ValidRoles.user)
+  getPromedioByIdUserAndTypeAllTime(
+    @Query() paginationDto: PaginationDto, 
+    @Param('id', ParseUUIDPipe) idUser: string, 
+    @Param('type') type: string
+    ) {
+    return this.healthDataService.getPromedioByIdUserAndTypeAllTime(paginationDto, idUser, type);
   }
 }

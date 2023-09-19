@@ -2,11 +2,13 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { CreateWatchHealthDatumDto } from './dto/create-watch-health-datum.dto';
 import { UpdateWatchHealthDatumDto } from './dto/update-watch-health-datum.dto';
 import { WatchHealthDatum } from './entities'
-import { DataSource, Repository } from 'typeorm';
+import { Between, DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/auth/entities';
 import { ResponseApi } from 'src/common/interfaces';
 import { PaginationDto } from 'src/common/dto';
+import { TypeHealthData } from 'src/common/enums';
+import { IHealthData } from './model';
 
 @Injectable()
 export class HealthDataService {
@@ -52,7 +54,7 @@ export class HealthDataService {
         }
       });
       const response: ResponseApi = {
-        status:200,
+        status: 200,
         success: true,
         message: 'All watchHealthDatum',
         data: families,
@@ -80,7 +82,7 @@ export class HealthDataService {
 
       });
       const response: ResponseApi = {
-        status:200,
+        status: 200,
         success: true,
         message: 'All WatchHealthDatum By UserId',
         data: families,
@@ -95,7 +97,7 @@ export class HealthDataService {
     const watchHealthDatum = await this.watchHealthDatumRepository.findOneBy({ id });
     if (!watchHealthDatum) throw new NotFoundException(`watchHealthDatum with id ${id} not found`);
     const response: ResponseApi = {
-      status:200,
+      status: 200,
       success: true,
       message: 'watchHealthDatum found!',
       data: watchHealthDatum,
@@ -103,7 +105,7 @@ export class HealthDataService {
     return response;
   }
 
- async update(id: string, updateWatchHealthDatumDto: UpdateWatchHealthDatumDto) {
+  async update(id: string, updateWatchHealthDatumDto: UpdateWatchHealthDatumDto) {
     const { ...toUpdate } = updateWatchHealthDatumDto;
     const watchHealthDatum = await this.watchHealthDatumRepository.preload({
       id,
@@ -120,7 +122,7 @@ export class HealthDataService {
       await queryRunner.release();
       const res = await this.watchHealthDatumRepository.findOneBy({ id });
       const response: ResponseApi = {
-        status:200,
+        status: 200,
         success: true,
         message: 'watchHealthDatum modified successfully!',
         data: res,
@@ -142,9 +144,171 @@ export class HealthDataService {
         success: true,
         message: 'watchHealthDatum removed successfully!',
         data: res,
-        status:200
+        status: 200
       }
       return response;
+    } catch (error) {
+      this.handleExceptions(error);
+    }
+  }
+
+
+  async getPromedioByIdUserAndTypeAllTime(paginationDto: PaginationDto, userId: string, type: string) {
+
+    try {
+      const { limit = 10, offset = 0 } = paginationDto;
+      const healthDatum = await this.watchHealthDatumRepository.find({
+        take: limit,
+        skip: offset,
+        relations: {
+          user: false
+        },
+        where: {
+          user: {
+            id: userId
+          },
+          type
+        },
+
+      });
+
+      const data: IHealthData[] = healthDatum;
+      // Crea una variable para almacenar el promedio.
+      let average = 0;
+
+      // Recorre el arreglo `data`.
+      for (const healthDatum of data) {
+        // Suma el valor de cada elemento al total.
+        average += healthDatum.value;
+      }
+
+      // Divide el total por la cantidad de elementos para obtener el promedio.
+      average /= data.length;
+
+
+      switch (type) {
+
+        case TypeHealthData.HEART_RATE:
+
+          const heart_rate: ResponseApi = {
+            status: 200,
+            success: true,
+            message: `Promedio de tipo ${TypeHealthData.HEART_RATE}`,
+            data: {
+              primedio: average
+            },
+          }
+          return heart_rate;
+
+        case TypeHealthData.STEPS:
+
+          const steps: ResponseApi = {
+            status: 200,
+            success: true,
+            message: `Promedio de tipo ${TypeHealthData.STEPS}`,
+            data: {
+              primedio: average
+            },
+          }
+          return steps;
+
+
+        default:
+          let response: ResponseApi = {
+            status: 403,
+            success: false,
+            message: 'El tipo es incorrecto',
+            data: null,
+          }
+          return response;
+      }
+
+    } catch (error) {
+      this.handleExceptions(error);
+    }
+  }
+
+  async getPromedioByIdUserAndTypeByTime(paginationDto: PaginationDto, userId: string, type: string,startDate:Date, endDate:Date) {
+
+    try {
+      const { limit = 10, offset = 0 } = paginationDto;
+      const healthDatum = await this.watchHealthDatumRepository.find({
+        take: limit,
+        skip: offset,
+        relations: {
+          user: false
+        },
+        where: {
+          user: {
+            id: userId
+          },
+          type,
+          createdAt: Between(startDate, endDate)
+        },
+
+      });
+
+      if (healthDatum.length<1) {
+        const data_vacia: ResponseApi = {
+          status: 200,
+          success: true,
+          message: `No hay registros en esas fechas`,
+          data: null,
+        }
+        return data_vacia
+      }
+
+      const data: IHealthData[] = healthDatum;
+      // Crea una variable para almacenar el promedio.
+      let average = 0;
+
+      // Recorre el arreglo `data`.
+      for (const healthDatum of data) {
+        // Suma el valor de cada elemento al total.
+        average += healthDatum.value;
+      }
+
+      // Divide el total por la cantidad de elementos para obtener el promedio.
+      average /= data.length;
+
+
+      switch (type) {
+
+        case TypeHealthData.HEART_RATE:
+
+          const heart_rate: ResponseApi = {
+            status: 200,
+            success: true,
+            message: `Promedio de tipo ${TypeHealthData.HEART_RATE}`,
+            data: {
+              primedio: average
+            },
+          }
+          return heart_rate;
+
+        case TypeHealthData.STEPS:
+
+          const steps: ResponseApi = {
+            status: 200,
+            success: true,
+            message: `Promedio de tipo ${TypeHealthData.STEPS}`,
+            data: {
+              primedio: average
+            },
+          }
+          return steps;
+
+
+        default:
+          let response: ResponseApi = {
+            status: 403,
+            success: false,
+            message: 'El tipo es incorrecto',
+            data: null,
+          }
+          return response;
+      }
+
     } catch (error) {
       this.handleExceptions(error);
     }
