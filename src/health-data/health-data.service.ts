@@ -9,7 +9,7 @@ import { ResponseApi } from 'src/common/interfaces';
 import { PaginationDto } from 'src/common/dto';
 import { TypeHealthData } from 'src/common/enums';
 import { IHealthData } from './model';
-import { extractYearMonthDay } from 'src/utils';
+import { getDatesOfWeekStartingFromMonday, extractYearMonthDay, getDatesFromMondayToToday } from 'src/utils';
 
 @Injectable()
 export class HealthDataService {
@@ -230,7 +230,7 @@ export class HealthDataService {
   }
 
   async getPromedioByIdUserAndTypeByTime(paginationDto: PaginationDto, userId: string, type: string, startDate: Date, endDate: Date) {
-    
+
     try {
       const { limit = 10, offset = 0 } = paginationDto;
       const query = `
@@ -238,10 +238,10 @@ export class HealthDataService {
       FROM watch_health_datum
       WHERE "createdAt" BETWEEN $1 AND $2 AND "userId" = $3 AND "type"= $4`;
 
-    const parameters = [extractYearMonthDay(startDate), extractYearMonthDay(endDate), userId, type];
+      const parameters = [extractYearMonthDay(startDate), extractYearMonthDay(endDate), userId, type];
 
-    const healthDatum = await this.userRepository.query(query, parameters);
-  
+      const healthDatum = await this.userRepository.query(query, parameters);
+
       if (healthDatum.length < 1) {
         const data_vacia: ResponseApi = {
           status: 200,
@@ -249,20 +249,16 @@ export class HealthDataService {
           message: `No hay registros en esas fechas`,
           data: null,
         }
-        return data_vacia
+        return data_vacia;
       }
 
       const data: IHealthData[] = healthDatum;
-      // Crea una variable para almacenar el promedio.
       let average = 0;
 
-      // Recorre el arreglo `data`.
       for (const healthDatum of data) {
-        // Suma el valor de cada elemento al total.
         average += healthDatum.value;
       }
 
-      // Divide el total por la cantidad de elementos para obtener el promedio.
       average /= data.length;
 
 
@@ -307,6 +303,49 @@ export class HealthDataService {
       this.handleExceptions(error);
     }
   }
+
+
+  async getPromedioByIdUserForWeek(paginationDto: PaginationDto, userId: string, type: string) {
+    const daysWeek = getDatesFromMondayToToday();
+
+    const responsePromises = daysWeek.map(async (day, i) => {
+      const query = `
+        SELECT *
+        FROM watch_health_datum
+        WHERE DATE("createdAt") = $1 AND "userId" = $2 AND "type" = $3`;
+
+      const parameters = [day, userId, type];
+      const healthDatum = await this.userRepository.query(query, parameters);
+
+      const data: IHealthData[] = healthDatum;
+
+      let average = 0;
+
+      for (const healthDatum of data) {
+        average += healthDatum.value;
+      }
+
+      average /= data.length;
+
+      const temp = {
+        x: i,
+        y: isNaN(average) ? 0 : average
+      };
+
+      return temp;
+    });
+
+    const response = await Promise.all(responsePromises);
+
+    const responseApi: ResponseApi = {
+      success: true,
+      message: 'Promedio de la semana para grafica',
+      status: 200,
+      data: response
+    }
+    return responseApi;
+  }
+
 
   private handleExceptions(error: any) {
 

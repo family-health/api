@@ -79,4 +79,16 @@ export class HealthDataController {
     ) {
     return this.healthDataService.getPromedioByIdUserAndTypeAllTime(paginationDto, idUser, type);
   }
+
+  @Get('getpromedioAllWeek/userId/:id/type/:type')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'get Promedio By IdUser And Type All Week' })
+  @Auth(ValidRoles.user)
+  getPromedioByIdUserForWeek(
+    @Query() paginationDto: PaginationDto, 
+    @Param('id', ParseUUIDPipe) idUser: string, 
+    @Param('type') type: string
+    ) {
+    return this.healthDataService.getPromedioByIdUserForWeek(paginationDto, idUser, type);
+  }
 }
