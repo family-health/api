@@ -9,6 +9,7 @@ import { ResponseApi } from 'src/common/interfaces';
 import { PaginationDto } from 'src/common/dto';
 import { TypeHealthData } from 'src/common/enums';
 import { IHealthData } from './model';
+import { extractYearMonthDay } from 'src/utils';
 
 @Injectable()
 export class HealthDataService {
@@ -228,27 +229,20 @@ export class HealthDataService {
     }
   }
 
-  async getPromedioByIdUserAndTypeByTime(paginationDto: PaginationDto, userId: string, type: string,startDate:Date, endDate:Date) {
-
+  async getPromedioByIdUserAndTypeByTime(paginationDto: PaginationDto, userId: string, type: string, startDate: Date, endDate: Date) {
+    
     try {
       const { limit = 10, offset = 0 } = paginationDto;
-      const healthDatum = await this.watchHealthDatumRepository.find({
-        take: limit,
-        skip: offset,
-        relations: {
-          user: false
-        },
-        where: {
-          user: {
-            id: userId
-          },
-          type,
-          createdAt: Between(startDate, endDate)
-        },
+      const query = `
+      SELECT *
+      FROM watch_health_datum
+      WHERE "createdAt" BETWEEN $1 AND $2 AND "userId" = $3 AND "type"= $4`;
 
-      });
+    const parameters = [extractYearMonthDay(startDate), extractYearMonthDay(endDate), userId, type];
 
-      if (healthDatum.length<1) {
+    const healthDatum = await this.userRepository.query(query, parameters);
+  
+      if (healthDatum.length < 1) {
         const data_vacia: ResponseApi = {
           status: 200,
           success: true,
