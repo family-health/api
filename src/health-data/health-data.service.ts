@@ -201,6 +201,18 @@ export class HealthDataService {
           }
           return heart_rate;
 
+        case TypeHealthData.BLOOD_GLUCOSE:
+
+          const blood_glucose: ResponseApi = {
+            status: 200,
+            success: true,
+            message: `Promedio de tipo ${TypeHealthData.BLOOD_GLUCOSE}`,
+            data: {
+              primedio: average
+            },
+          }
+          return blood_glucose;
+
         case TypeHealthData.STEPS:
 
           const steps: ResponseApi = {
@@ -287,6 +299,17 @@ export class HealthDataService {
             },
           }
           return steps;
+        case TypeHealthData.BLOOD_GLUCOSE:
+
+          const blood_glucose: ResponseApi = {
+            status: 200,
+            success: true,
+            message: `Promedio de tipo ${TypeHealthData.BLOOD_GLUCOSE}`,
+            data: {
+              primedio: average
+            },
+          }
+          return blood_glucose;
 
 
         default:
