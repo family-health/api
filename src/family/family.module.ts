@@ -9,6 +9,7 @@ import { EmailModule } from 'src/email/email.module';
 @Module({
   controllers: [FamilyController],
   providers: [FamilyService],
-  imports: [AuthModule, TypeOrmModule.forFeature([Family]), EmailModule]
+  imports: [AuthModule, TypeOrmModule.forFeature([Family]), EmailModule],
+  exports: [FamilyService,TypeOrmModule]
 })
 export class FamilyModule { }

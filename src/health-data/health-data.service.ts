@@ -1,17 +1,18 @@
-import { validarFrecuenciaCardiaca } from './../utils/helper.utils';
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
-import { CreateWatchHealthDatumDto } from './dto/create-watch-health-datum.dto';
-import { UpdateWatchHealthDatumDto } from './dto/update-watch-health-datum.dto';
-import { WatchHealthDatum } from './entities'
-import { Between, DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/auth/entities';
-import { ResponseApi } from 'src/common/interfaces';
 import { PaginationDto } from 'src/common/dto';
 import { TypeHealthData } from 'src/common/enums';
-import { IHealthData } from './model';
-import { getDatesOfWeekStartingFromMonday, extractYearMonthDay, getDatesFromMondayToToday, calcularEdad } from 'src/utils';
+import { ResponseApi } from 'src/common/interfaces';
 import { EmailService } from 'src/email/email.service';
+import { calcularEdad, extractYearMonthDay, getDatesFromMondayToToday } from 'src/utils';
+import { DataSource, Repository } from 'typeorm';
+import { validarFrecuenciaCardiaca } from './../utils/helper.utils';
+import { CreateWatchHealthDatumDto } from './dto/create-watch-health-datum.dto';
+import { UpdateWatchHealthDatumDto } from './dto/update-watch-health-datum.dto';
+import { WatchHealthDatum } from './entities';
+import { IHealthData } from './model';
+import { Family } from 'src/family/entities';
 
 @Injectable()
 export class HealthDataService {
@@ -22,6 +23,8 @@ export class HealthDataService {
     private readonly watchHealthDatumRepository: Repository<WatchHealthDatum>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Family)
+    private readonly familyRepository: Repository<Family>,
     private readonly dataSource: DataSource,
     private readonly emailService: EmailService
   ) { }
@@ -29,14 +32,23 @@ export class HealthDataService {
   async create(createWatchHealthDatumDto: CreateWatchHealthDatumDto) {
     const user = await this.userRepository.findOneBy({ id: createWatchHealthDatumDto.userId });
     if (!user) throw new NotFoundException(`User with id ${createWatchHealthDatumDto.userId} not found`);
+    const families = await this.familyRepository.find({ where: { user: { id: user.id } } });
+    if (!user) throw new NotFoundException(`User with id ${createWatchHealthDatumDto.userId} not found`);
     const fechaNacimiento = new Date(user.birth);
     const edad = calcularEdad(fechaNacimiento);
     const frc = createWatchHealthDatumDto.value;
 
+    const verifiedEmergencyFamilies = families.filter((family) => {
+      return family.isEmergency && family.isVerified;
+    });
+
     const alert = validarFrecuenciaCardiaca(edad,frc);
+    
 
     if (alert.alert && createWatchHealthDatumDto.type === TypeHealthData.HEART_RATE) {
-      this.sendAlertEmail(user.email,alert.frec);
+      verifiedEmergencyFamilies.forEach(i => {
+        this.sendAlertEmail(i.email,alert.frec);
+      });
     }
 
 
@@ -384,7 +396,7 @@ export class HealthDataService {
   }
 
   private async sendAlertEmail(email: string, frec:number) {
-    const user = await this.userRepository.findOneBy({ email });
+    const user = await this.familyRepository.findOneBy({ email });
     if (!user) throw new NotFoundException(`User with email ${email} not found`);
     const subject = 'Signos vitales';
     const text = ``;
