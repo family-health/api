@@ -35,7 +35,7 @@ export class HealthDataService {
 
     const alert = validarFrecuenciaCardiaca(edad,frc);
 
-    if (alert.alert) {
+    if (alert.alert && createWatchHealthDatumDto.type === TypeHealthData.HEART_RATE) {
       this.sendAlertEmail(user.email,alert.frec);
     }
 
