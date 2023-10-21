@@ -1,3 +1,4 @@
+import { validarFrecuenciaCardiaca } from './../utils/helper.utils';
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateWatchHealthDatumDto } from './dto/create-watch-health-datum.dto';
 import { UpdateWatchHealthDatumDto } from './dto/update-watch-health-datum.dto';
@@ -9,7 +10,8 @@ import { ResponseApi } from 'src/common/interfaces';
 import { PaginationDto } from 'src/common/dto';
 import { TypeHealthData } from 'src/common/enums';
 import { IHealthData } from './model';
-import { getDatesOfWeekStartingFromMonday, extractYearMonthDay, getDatesFromMondayToToday } from 'src/utils';
+import { getDatesOfWeekStartingFromMonday, extractYearMonthDay, getDatesFromMondayToToday, calcularEdad } from 'src/utils';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class HealthDataService {
@@ -21,11 +23,23 @@ export class HealthDataService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly dataSource: DataSource,
+    private readonly emailService: EmailService
   ) { }
 
   async create(createWatchHealthDatumDto: CreateWatchHealthDatumDto) {
     const user = await this.userRepository.findOneBy({ id: createWatchHealthDatumDto.userId });
     if (!user) throw new NotFoundException(`User with id ${createWatchHealthDatumDto.userId} not found`);
+    const fechaNacimiento = new Date(user.birth);
+    const edad = calcularEdad(fechaNacimiento);
+    const frc = createWatchHealthDatumDto.value;
+
+    const alert = validarFrecuenciaCardiaca(edad,frc);
+
+    if (alert.alert) {
+      this.sendAlertEmail(user.email,alert.frec);
+    }
+
+
     try {
       const watchHealthDatum = this.watchHealthDatumRepository.create({
         ...createWatchHealthDatumDto,
@@ -369,6 +383,28 @@ export class HealthDataService {
     return responseApi;
   }
 
+  private async sendAlertEmail(email: string, frec:number) {
+    const user = await this.userRepository.findOneBy({ email });
+    if (!user) throw new NotFoundException(`User with email ${email} not found`);
+    const subject = 'Signos vitales';
+    const text = ``;
+    const html = `
+      <p>Alerta tu freciencia cardiaca es de ${frec} lpm </p>
+    `;
+
+    try {
+      await this.emailService.sendEmail(email, subject, text, html);
+      const response: ResponseApi = {
+        success: true,
+        message: 'Invitación enviada correctamente',
+        data: null,
+        status: 200
+      }
+      return response;
+    } catch (error) {
+      this.handleExceptions(error);
+    }
+  }
 
   private handleExceptions(error: any) {
 
