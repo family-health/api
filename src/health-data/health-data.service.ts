@@ -46,8 +46,8 @@ export class HealthDataService {
     
 
     if (alert.alert && createWatchHealthDatumDto.type === TypeHealthData.HEART_RATE) {
-      verifiedEmergencyFamilies.forEach(i => {
-        this.sendAlertEmail(i.email,alert.frec);
+      verifiedEmergencyFamilies.forEach(async i => { 
+        await this.sendAlertEmail(i.email,alert.frec);
       });
     }
 
