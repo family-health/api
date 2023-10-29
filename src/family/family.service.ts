@@ -36,7 +36,7 @@ export class FamilyService {
         user
       });
       await this.familyRepository.save(family);
-      await this.sendInvitationEmail(createFamilyDto.email);
+      await this.sendInvitationEmail(createFamilyDto.email, user);
       const response: ResponseApi = {
         status:200,
         success: true,
@@ -158,15 +158,15 @@ export class FamilyService {
     }
   }
 
-  async sendInvitationEmail(email: string) {
+  async sendInvitationEmail(email: string, user: User) {
     const family = await this.familyRepository.findOneBy({ email });
     if (!family) throw new NotFoundException(`Family with email ${email} not found`);
     const token = this.jwtService.sign({ email: email, timestamp: Date.now() });
     const url_acepted_invitacion = `${process.env.HOST_NAME}/api/family/accept-invitation/${token}`;
-    const subject = 'Invitación para ser miembro de la familia';
+    const subject = 'Family Health - Invitacion a ser miembro de familia';
     const text = `Hola, has sido invitado a ser miembro de la familia en nuestra aplicación.El token expira en 10 minutos, por favor, haz clic en el siguiente botón para aceptar la invitación:`;
     const html = `
-      <p>Hola, has sido invitado a ser miembro de la familia en nuestra aplicación. Haz clic en el botón para aceptar la invitación:</p>
+      <p>Hola, ${user.name} te ha invitado a ser miembro de la familia en nuestra aplicación. El token expira en 10 minutos, por favor, haz clic en el siguiente botón para aceptar la invitación:</p>
       <div style="display: flex; justify-content: center;">
         <a href=${url_acepted_invitacion} style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 14px; margin: 30px 4px 4px; cursor: pointer; border-radius: 5px;">
           Aceptar invitación

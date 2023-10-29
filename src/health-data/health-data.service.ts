@@ -47,7 +47,7 @@ export class HealthDataService {
 
     if (alert.alert && createWatchHealthDatumDto.type === TypeHealthData.HEART_RATE) {
       verifiedEmergencyFamilies.forEach(async i => { 
-        await this.sendAlertEmail(i.email,alert.frec);
+        await this.sendAlertEmail(i.email,alert.frec,user);
       });
     }
 
@@ -395,20 +395,20 @@ export class HealthDataService {
     return responseApi;
   }
 
-  private async sendAlertEmail(email: string, frec:number) {
-    const user = await this.familyRepository.findOneBy({ email });
-    if (!user) throw new NotFoundException(`User with email ${email} not found`);
+  private async sendAlertEmail(email: string, frec:number, user:User) {
+    const family = await this.familyRepository.findOneBy({ email });
+    if (!family) throw new NotFoundException(`User with email ${email} not found`);
     const subject = 'Signos vitales';
     const text = ``;
     const html = `
-      <p>Alerta tu freciencia cardiaca es de ${frec} lpm </p>
+      <p>Alerta!!, la freciencia cardiaca DE ${user.name} es de ${frec} lpm </p>
     `;
 
     try {
       await this.emailService.sendEmail(email, subject, text, html);
       const response: ResponseApi = {
         success: true,
-        message: 'Invitación enviada correctamente',
+        message: 'alerta enviada correctamente',
         data: null,
         status: 200
       }
