@@ -66,10 +66,10 @@ export class FamilyController {
     return this.familyService.aceptInvitationEmail(token);
   }
 
-  @Get('send-invitation/:email')
+  @Get('send-invitation/:email/:id')
   @Auth(ValidRoles.user)
   @ApiOperation({ summary: 'Send invitation for be family' })
-  async sendInvitation(@Param('email') email: string) {
-    return this.familyService.sendInvitationEmail(email);
+  async sendInvitation(@Param('email') email: string,@Param('id') id: string) {
+    return this.familyService.sendInvitationEmail(email,id);
   }
 }

@@ -36,7 +36,7 @@ export class FamilyService {
         user
       });
       await this.familyRepository.save(family);
-      await this.sendInvitationEmail(createFamilyDto.email, user);
+      await this.sendInvitationEmail(createFamilyDto.email, user.id);
       const response: ResponseApi = {
         status:200,
         success: true,
@@ -158,9 +158,11 @@ export class FamilyService {
     }
   }
 
-  async sendInvitationEmail(email: string, user: User) {
+  async sendInvitationEmail(email: string, id: string) {
     const family = await this.familyRepository.findOneBy({ email });
+    const user = await this.userRepository.findOneBy({ id });
     if (!family) throw new NotFoundException(`Family with email ${email} not found`);
+    if (!user) throw new NotFoundException(`User with id ${id} not found`);
     const token = this.jwtService.sign({ email: email, timestamp: Date.now() });
     const url_acepted_invitacion = `${process.env.HOST_NAME}/api/family/accept-invitation/${token}`;
     const subject = 'Family Health - Invitacion a ser miembro de familia';
@@ -220,7 +222,7 @@ export class FamilyService {
       return htmlResponse;
     }
   }
-
+  
 
   private handleExceptions(error: any) {
 
